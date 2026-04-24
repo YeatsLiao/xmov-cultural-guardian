@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>文化遗产数字守护者</title>
+    <style>
+      /* --- 1. 全局重置与字体 --- */
+      :root {
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --danger-color: #ef4444;
+        --success-color: #10b981;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --text-main: #1f2937;
+        --text-sub: #6b7280;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        margin: 0;
+        padding: 40px 20px;
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+
+      /* --- 2. 顶部配置栏 --- */
+      .config-header {
+        background: var(--card-bg);
+        padding: 15px 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end; /* 底部对齐 */
+        gap: 15px;
+        margin-bottom: 30px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .input-group label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-sub);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .input-group input {
+        padding: 0 14px;
+        height: 42px; /* 统一高度 */
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+        background: #f9fafb;
+        box-sizing: border-box;
+      }
+
+      .input-group input:focus {
+        border-color: var(--primary-color);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
+
+      /* 按钮组 */
+      .action-group {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+      }
+
+      button {
+        padding: 0 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 42px; /* 统一高度 */
+        white-space: nowrap;
+      }
+
+      button:active {
+        transform: scale(0.98);
+      }
+
+      .btn-primary {
+        background: var(--primary-color);
+        color: white;
+      }
+      .btn-primary:hover {
+        background: var(--primary-hover);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      }
+
+      .btn-danger {
+        background: var(--danger-color);
+        color: white;
+      }
+      .btn-danger:hover {
+        background: #dc2626;
+      }
+
+      .btn-secondary {
+        background: #e5e7eb;
+        color: var(--text-main);
+      }
+      .btn-secondary:hover {
+        background: #d1d5db;
+      }
+
+      /* 状态指示 */
+      .status-wrapper {
+        margin-left: auto; /* 推到最右边 */
+        display: flex;
+        align-items: center;
+        font-size: 13px;
+        color: var(--text-sub);
+        background: #f3f4f6;
+        padding: 0 16px;
+        border-radius: 20px;
+        height: 42px;
+        box-sizing: border-box;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #d1d5db; /* 默认灰色 */
+        margin-right: 8px;
+        transition: background 0.3s;
+      }
+
+      /* 状态颜色定义 */
+      .status-dot.success {
+        background: var(--success-color);
+        box-shadow: 0 0 6px var(--success-color);
+      }
+      .status-dot.error {
+        background: var(--danger-color);
+        box-shadow: 0 0 6px var(--danger-color);
+      }
+      .status-dot.loading {
+        background: #f59e0b;
+      }
+
+      /* --- 3. 数字人舞台 --- */
+      #sdk-wrapper {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 30px;
+      }
+
+      #sdk {
+        width: 800px;
+        height: 450px;
+        background-color: #000;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        position: relative;
+        overflow: hidden;
+        max-width: 100%;
+      }
+
+      #sdk::before {
+        content: "文化遗产数字守护者"; 
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #333;
+        font-size: 14px;
+        z-index: 0;
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      /* --- 4. 文化遗产信息栏 --- */
+      .heritage-info {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        max-width: 900px;
+        margin-bottom: 30px;
+        box-sizing: border-box;
+      }
+
+      .heritage-info h3 {
+        margin-top: 0;
+        color: var(--primary-color);
+      }
+
+      .heritage-info ul {
+        margin-bottom: 0;
+      }
+
+      /* --- 5. 底部对话栏 --- */
+      .chat-bar {
+        background: var(--card-bg);
+        padding: 5px;
+        border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 700px;
+        display: flex;
+        gap: 10px;
+        position: relative;
+        box-sizing: border-box;
+      }
+
+      .chat-bar input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        padding: 0 20px;
+        font-size: 16px;
+        outline: none;
+        color: var(--text-main);
+        height: 42px;
+      }
+
+      .chat-bar button {
+        border-radius: 40px;
+        padding: 0 30px;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+      }
+
+      /* 响应式适配 */
+      @media (max-width: 768px) {
+        .config-header {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .action-group {
+          flex-wrap: wrap;
+        }
+        .status-wrapper {
+          margin-left: 0;
+          width: fit-content;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="config-header">
+      <div class="input-group">
+        <label>App ID</label>
+        <input type="text" id="inp-appid" placeholder="粘贴 App ID" />
+      </div>
+      <div class="input-group">
+        <label>App Secret</label>
+        <input type="password" id="inp-secret" placeholder="粘贴 App Secret" />
+      </div>
+
+      <div class="action-group">
+        <button class="btn-primary" onclick="doConnect()" id="btn-conn">
+          连接
+        </button>
+        <button
+          class="btn-danger"
+          onclick="doDisconnect()"
+          style="display:none;"
+          id="btn-disconn"
+        >
+          断开
+        </button>
+
+        <button class="btn-secondary" onclick="toggleRatio()" id="btn-ratio">
+          切换至竖屏
+        </button>
+      </div>
+
+      <div class="status-wrapper">
+        <div class="status-dot" id="status-light"></div>
+        <span id="status-text">未连接</span>
+      </div>
+    </header>
+
+    <div id="sdk-wrapper">
+      <div id="sdk"></div>
+    </div>
+
+    <div class="heritage-info" id="heritage-info">
+      <h3>文化遗产数字守护者</h3>
+      <p>点击下方按钮开始文化遗产导览，了解中国的珍贵文化遗产。</p>
+    </div>
+
+    <div class="chat-bar">
+      <input
+        type="text"
+        id="tts-input"
+        placeholder="询问文化遗产相关问题..."
+        value="长城有多长？"
+      />
+      <button class="btn-primary" onclick="askQuestion()">提问</button>
+      <button class="btn-secondary" onclick="startHeritageTour()">开始导览</button>
+    </div>
+
+    <script src="https://media.xingyun3d.com/xingyun3d/general/litesdk/xmovAvatar@latest.js"></script>
+
+    <script>
+      let sdk = null;
+      let isPortrait = false;
+
+      // 文化遗产数据
+      const culturalHeritages = [
+        {
+          id: "great-wall",
+          name: "长城",
+          description: "中国古代伟大的防御工程，是世界文化遗产",
+          history: "始建于春秋战国时期，秦统一后连接修缮，汉明两代大规模修建",
+          facts: [
+            "长城全长超过21000公里",
+            "是世界上最伟大的建筑之一",
+            "是中国古代劳动人民智慧的结晶"
+          ],
+          stories: "孟姜女哭长城的故事讲述了古代劳动人民的苦难和对爱情的忠贞"
+        },
+        {
+          id: "forbidden-city",
+          name: "故宫",
+          description: "中国明清两代的皇家宫殿，是世界上现存规模最大、保存最为完整的木质结构古建筑之一",
+          history: "建于明朝永乐年间，是明清两代皇帝的居所",
+          facts: [
+            "占地面积约72万平方米",
+            "有大小宫殿七十多座，房屋九千余间",
+            "是世界文化遗产，国家5A级旅游景区"
+          ],
+          stories: "故宫的建筑布局体现了中国古代的风水理念和皇权思想"
+        },
+        {
+          id: "terracotta-army",
+          name: "兵马俑",
+          description: "秦始皇陵的陪葬坑，被誉为\"世界第八大奇迹\"",
+          history: "发现于1974年，是秦始皇统一六国后为自己修建的地下军队",
+          facts: [
+            "已发现的兵马俑超过8000个",
+            "每个兵马俑的面容都不相同",
+            "是研究秦代军事、艺术和科技的重要资料"
+          ],
+          stories: "兵马俑的发现纯属偶然，是当地农民打井时发现的"
+        }
+      ];
+
+      // 文化遗产问题库
+      const heritageQuestions = [
+        {
+          question: "长城有多长？",
+          answer: "长城全长超过21000公里，是世界上最长的防御工程。"
+        },
+        {
+          question: "故宫建于什么时候？",
+          answer: "故宫建于明朝永乐年间，由明成祖朱棣下令修建。"
+        },
+        {
+          question: "兵马俑在哪里发现的？",
+          answer: "兵马俑是1974年在陕西西安临潼区被当地农民打井时发现的。"
+        },
+        {
+          question: "文化遗产有什么价值？",
+          answer: "文化遗产是人类历史的见证，具有历史、艺术、科学等多方面的价值，需要我们共同保护和传承。"
+        }
+      ];
+
+      // 1. 连接 SDK
+      async function doConnect() {
+        if (sdk) return;
+
+        const appId = document.getElementById("inp-appid").value.trim();
+        const appSecret = document.getElementById("inp-secret").value.trim();
+
+        if (!appId || !appSecret) {
+          alert("请先在顶部输入框填写 AppID 和 AppSecret");
+          return;
+        }
+
+        // [状态] 开始连接
+        updateStatus("loading", "连接中...");
+
+        // 实例化
+        sdk = new XmovAvatar({
+          containerId: "#sdk",
+          appId: appId,
+          appSecret: appSecret,
+          gatewayServer:
+            "https://nebula-agent.xingyun3d.com/user/v1/ttsa/session",
+          onMessage: (msg) => console.log("SDK Event:", msg),
+        });
+
+        try {
+          // 必须传入对象参数
+          await sdk.init({
+            onDownloadProgress: (p) => {
+              // [关键逻辑] 仅 <100 时更新进度，避免覆盖最终的 Success 状态
+              if (p < 100) {
+                updateStatus("loading", `${p}%`);
+              }
+            },
+          });
+
+          // [状态] 连接成功
+          updateStatus("success", "已连接");
+          console.log("初始化成功");
+          toggleButtons(true);
+        } catch (err) {
+          console.error(err);
+          // [状态] 连接失败
+          updateStatus("error", "连接失败");
+          alert("连接失败，请检查凭证是否正确 (F12看详情)");
+          sdk = null;
+        }
+      }
+
+      // 2. 断开连接
+      function doDisconnect() {
+        if (sdk) {
+          sdk.destroy();
+          sdk = null;
+          // [状态] 已断开
+          updateStatus("error", "已断开");
+          toggleButtons(false);
+        }
+      }
+
+      // 3. 切换比例 (横/竖)
+      function toggleRatio() {
+        const container = document.getElementById("sdk");
+        const btn = document.getElementById("btn-ratio");
+
+        if (isPortrait) {
+          // 切换为横屏
+          container.style.width = "800px";
+          container.style.height = "450px";
+          isPortrait = false;
+          btn.innerText = "切换至竖屏";
+        } else {
+          // 切换为竖屏
+          container.style.width = "360px";
+          container.style.height = "640px";
+          isPortrait = true;
+          btn.innerText = "切换至横屏";
+        }
+      }
+
+      // 4. 开始文化遗产导览
+      function startHeritageTour() {
+        if (!sdk) {
+          alert("请先点击顶部的 [连接] 按钮");
+          return;
+        }
+        sdk.speak("欢迎来到文化遗产数字守护者！我将带您了解中国的珍贵文化遗产。", true, true);
+        setTimeout(() => {
+          showHeritage(0); // 开始介绍第一个文化遗产
+        }, 3000);
+      }
+
+      // 5. 展示文化遗产
+      function showHeritage(index) {
+        if (index >= culturalHeritages.length) {
+          // 导览结束
+          sdk.speak("文化遗产导览结束！希望您对中国的文化遗产有了更深入的了解。", true, true);
+          return;
+        }
+        
+        const heritage = culturalHeritages[index];
+        sdk.speak(`现在我们来了解${heritage.name}，${heritage.description}`, true, false);
+        setTimeout(() => {
+          sdk.speak(`历史背景：${heritage.history}`, false, false);
+        }, 4000);
+        setTimeout(() => {
+          const factsText = heritage.facts.join('。');
+          sdk.speak(`有趣的事实：${factsText}`, false, false);
+        }, 8000);
+        setTimeout(() => {
+          sdk.speak(`相关故事：${heritage.stories}`, false, true);
+        }, 12000);
+        
+        // 更新界面
+        updateHeritageUI(heritage);
+        
+        // 30秒后介绍下一个
+        setTimeout(() => {
+          showHeritage(index + 1);
+        }, 16000);
+      }
+
+      // 6. 文化遗产问答
+      function askQuestion() {
+        if (!sdk) {
+          alert("请先点击顶部的 [连接] 按钮");
+          return;
+        }
+        const text = document.getElementById("tts-input").value;
+        if (text) {
+          // 查找相关问题
+          const answer = findAnswer(text);
+          sdk.speak(answer, true, true);
+        }
+      }
+
+      // 7. 查找答案
+      function findAnswer(question) {
+        const lowerQuestion = question.toLowerCase();
+        for (const q of heritageQuestions) {
+          if (lowerQuestion.includes(q.question.toLowerCase())) {
+            return q.answer;
+          }
+        }
+        return "关于这个问题，我还需要进一步学习。不过我可以为您介绍更多文化遗产的知识。";
+      }
+
+      // 8. 更新文化遗产UI
+      function updateHeritageUI(heritage) {
+        const heritageElement = document.getElementById("heritage-info");
+        heritageElement.innerHTML = `
+          <h3>${heritage.name}</h3>
+          <p>${heritage.description}</p>
+          <h4>历史背景：</h4>
+          <p>${heritage.history}</p>
+          <h4>有趣的事实：</h4>
+          <ul>${heritage.facts.map(fact => `<li>${fact}</li>`).join('')}</ul>
+          <h4>相关故事：</h4>
+          <p>${heritage.stories}</p>
+        `;
+      }
+
+      // UI 状态管理
+      function updateStatus(state, text) {
+        const light = document.getElementById("status-light");
+        const label = document.getElementById("status-text");
+
+        light.className = "status-dot"; // Reset
+        if (state === "success") light.classList.add("success");
+        else if (state === "error") light.classList.add("error");
+        else if (state === "loading") light.classList.add("loading");
+
+        label.innerText = text;
+      }
+
+      function toggleButtons(isConnected) {
+        const btnConn = document.getElementById("btn-conn");
+        const btnDisconn = document.getElementById("btn-disconn");
+
+        if (isConnected) {
+          btnConn.style.display = "none";
+          btnDisconn.style.display = "inline-flex";
+        } else {
+          btnConn.style.display = "inline-flex";
+          btnDisconn.style.display = "none";
+        }
+      }
+
+      // 优雅退出
+      window.addEventListener("beforeunload", () => {
+        if (sdk) sdk.destroy();
+      });
+    </script>
+  </body>
+</html>

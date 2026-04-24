@@ -312,7 +312,14 @@
 
     <div class="heritage-info" id="heritage-info">
       <h3>文化遗产数字守护者</h3>
-      <p>点击下方按钮开始文化遗产导览，了解中国的珍贵文化遗产。</p>
+      <p>点击下方按钮开始文化遗产导览，或直接选择要了解的文化遗产：</p>
+      <div class="heritage-selector" style="display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0;">
+        <button class="btn-secondary" onclick="showHeritageByID('great-wall')">长城</button>
+        <button class="btn-secondary" onclick="showHeritageByID('forbidden-city')">故宫</button>
+        <button class="btn-secondary" onclick="showHeritageByID('terracotta-army')">兵马俑</button>
+        <button class="btn-secondary" onclick="showHeritageByID('potala-palace')">布达拉宫</button>
+        <button class="btn-secondary" onclick="showHeritageByID('mogao-caves')">莫高窟</button>
+      </div>
     </div>
 
     <div class="chat-bar">
@@ -344,7 +351,8 @@
             "是世界上最伟大的建筑之一",
             "是中国古代劳动人民智慧的结晶"
           ],
-          stories: "孟姜女哭长城的故事讲述了古代劳动人民的苦难和对爱情的忠贞"
+          stories: "孟姜女哭长城的故事讲述了古代劳动人民的苦难和对爱情的忠贞",
+          image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=The%20Great%20Wall%20of%20China%20in%20the%20mountains%2C%20ancient%20architecture%2C%20scenic%20view&image_size=landscape_16_9"
         },
         {
           id: "forbidden-city",
@@ -356,7 +364,8 @@
             "有大小宫殿七十多座，房屋九千余间",
             "是世界文化遗产，国家5A级旅游景区"
           ],
-          stories: "故宫的建筑布局体现了中国古代的风水理念和皇权思想"
+          stories: "故宫的建筑布局体现了中国古代的风水理念和皇权思想",
+          image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Forbidden%20City%20in%20Beijing%2C%20ancient%20Chinese%20palace%2C%20majestic%20architecture&image_size=landscape_16_9"
         },
         {
           id: "terracotta-army",
@@ -368,7 +377,34 @@
             "每个兵马俑的面容都不相同",
             "是研究秦代军事、艺术和科技的重要资料"
           ],
-          stories: "兵马俑的发现纯属偶然，是当地农民打井时发现的"
+          stories: "兵马俑的发现纯属偶然，是当地农民打井时发现的",
+          image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Terracotta%20Army%20in%20Xian%2C%20ancient%20Chinese%20clay%20soldiers%2C%20historical%20site&image_size=landscape_16_9"
+        },
+        {
+          id: "potala-palace",
+          name: "布达拉宫",
+          description: "世界上海拔最高的宫殿，是藏传佛教的圣地",
+          history: "始建于公元7世纪，是吐蕃赞普松赞干布为迎娶文成公主而建",
+          facts: [
+            "位于西藏拉萨，海拔3700米",
+            "是世界文化遗产，国家5A级旅游景区",
+            "建筑风格融合了藏、汉、尼泊尔等多种文化元素"
+          ],
+          stories: "布达拉宫是西藏的象征，也是藏传佛教的重要圣地，每年吸引大量信徒和游客前来朝拜和参观。",
+          image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Potala%20Palace%20in%20Lhasa%2C%20Tibet%2C%20ancient%20Tibetan%20architecture%2C%20mountain%20view&image_size=landscape_16_9"
+        },
+        {
+          id: "mogao-caves",
+          name: "莫高窟",
+          description: "中国四大石窟之一，是世界上现存规模最大、内容最丰富的佛教艺术圣地",
+          history: "始建于前秦时期，历经十六国、北朝、隋、唐、五代、西夏、元等朝代的建设",
+          facts: [
+            "位于甘肃敦煌，有735个洞窟",
+            "保存有壁画4.5万平方米，彩塑2415尊",
+            "是世界文化遗产，国家5A级旅游景区"
+          ],
+          stories: "莫高窟的壁画和彩塑艺术价值极高，被誉为\"墙壁上的博物馆\"，是研究中国古代艺术和历史的重要资料。",
+          image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Mogao%20Caves%20in%20Dunhuang%2C%20ancient%20Buddhist%20caves%20with%20murals%2C%20historical%20site&image_size=landscape_16_9"
         }
       ];
 
@@ -389,6 +425,30 @@
         {
           question: "文化遗产有什么价值？",
           answer: "文化遗产是人类历史的见证，具有历史、艺术、科学等多方面的价值，需要我们共同保护和传承。"
+        },
+        {
+          question: "布达拉宫在哪里？",
+          answer: "布达拉宫位于西藏自治区拉萨市，是世界上海拔最高的宫殿。"
+        },
+        {
+          question: "莫高窟有多少个洞窟？",
+          answer: "莫高窟共有735个洞窟，保存有大量的壁画和彩塑。"
+        },
+        {
+          question: "长城的作用是什么？",
+          answer: "长城的主要作用是防御北方游牧民族的入侵，同时也是中国古代边疆治理的重要象征。"
+        },
+        {
+          question: "故宫的建筑特点是什么？",
+          answer: "故宫的建筑特点是严格的对称布局，体现了中国古代的皇权思想和风水理念，建筑工艺精湛，气势宏伟。"
+        },
+        {
+          question: "兵马俑的历史价值是什么？",
+          answer: "兵马俑为研究秦代的军事、艺术、科技等方面提供了重要的实物资料，被誉为'世界第八大奇迹'。"
+        },
+        {
+          question: "如何保护文化遗产？",
+          answer: "保护文化遗产需要政府、社会和个人的共同努力，包括法律法规的制定、科学的保护技术、公众的文化自觉等多个方面。"
         }
       ];
 
@@ -543,15 +603,52 @@
       function updateHeritageUI(heritage) {
         const heritageElement = document.getElementById("heritage-info");
         heritageElement.innerHTML = `
-          <h3>${heritage.name}</h3>
-          <p>${heritage.description}</p>
-          <h4>历史背景：</h4>
-          <p>${heritage.history}</p>
-          <h4>有趣的事实：</h4>
-          <ul>${heritage.facts.map(fact => `<li>${fact}</li>`).join('')}</ul>
-          <h4>相关故事：</h4>
-          <p>${heritage.stories}</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start;">
+            <div style="flex: 1; min-width: 300px;">
+              <h3>${heritage.name}</h3>
+              <p>${heritage.description}</p>
+              <h4>历史背景：</h4>
+              <p>${heritage.history}</p>
+              <h4>有趣的事实：</h4>
+              <ul>${heritage.facts.map(fact => `<li>${fact}</li>`).join('')}</ul>
+              <h4>相关故事：</h4>
+              <p>${heritage.stories}</p>
+            </div>
+            <div style="flex: 1; min-width: 300px; max-width: 500px;">
+              <img src="${heritage.image}" alt="${heritage.name}" style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" />
+            </div>
+          </div>
+          <div class="heritage-selector" style="display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0;">
+            <button class="btn-secondary" onclick="showHeritageByID('great-wall')">长城</button>
+            <button class="btn-secondary" onclick="showHeritageByID('forbidden-city')">故宫</button>
+            <button class="btn-secondary" onclick="showHeritageByID('terracotta-army')">兵马俑</button>
+            <button class="btn-secondary" onclick="showHeritageByID('potala-palace')">布达拉宫</button>
+            <button class="btn-secondary" onclick="showHeritageByID('mogao-caves')">莫高窟</button>
+          </div>
         `;
+      }
+
+      // 9. 通过ID显示文化遗产
+      function showHeritageByID(id) {
+        if (!sdk) {
+          alert("请先点击顶部的 [连接] 按钮");
+          return;
+        }
+        const heritage = culturalHeritages.find(h => h.id === id);
+        if (heritage) {
+          sdk.speak(`现在我们来了解${heritage.name}，${heritage.description}`, true, false);
+          setTimeout(() => {
+            sdk.speak(`历史背景：${heritage.history}`, false, false);
+          }, 4000);
+          setTimeout(() => {
+            const factsText = heritage.facts.join('。');
+            sdk.speak(`有趣的事实：${factsText}`, false, false);
+          }, 8000);
+          setTimeout(() => {
+            sdk.speak(`相关故事：${heritage.stories}`, false, true);
+          }, 12000);
+          updateHeritageUI(heritage);
+        }
       }
 
       // UI 状态管理

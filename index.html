@@ -2,10 +2,776 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="refresh" content="0;url=cultural-heritage-guardian.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>文化遗产数字守护者</title>
+    <style>
+      :root {
+        --primary: #b8860b;
+        --primary-hover: #996515;
+        --primary-light: rgba(184, 134, 11, 0.12);
+        --danger: #c0392b;
+        --success: #2d8a4e;
+        --bg: #1a1510;
+        --card: rgba(35, 29, 20, 0.92);
+        --card-border: rgba(184, 134, 11, 0.18);
+        --text: #e8dcc8;
+        --text-dim: #a89878;
+        --gold: #d4a017;
+        --gold-bright: #f0c040;
+        --jade: #5a8a6a;
+        --cinnabar: #c05050;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Noto Serif SC", serif;
+        background-color: var(--bg);
+        color: var(--text);
+        height: 100vh;
+        overflow: hidden;
+        background-image:
+          radial-gradient(ellipse at 15% 80%, rgba(184,134,11,0.06) 0%, transparent 50%),
+          radial-gradient(ellipse at 85% 20%, rgba(90,138,106,0.04) 0%, transparent 50%);
+      }
+
+      /* --- 主布局：左数字人 + 右信息 --- */
+      .main-layout {
+        display: flex;
+        height: 100vh;
+        gap: 0;
+      }
+
+      /* === 左侧：数字人区域 === */
+      .left-panel {
+        flex: 0 0 55%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      /* 顶部配置栏（紧凑） */
+      .config-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px;
+        background: var(--card);
+        border-bottom: 1px solid var(--card-border);
+        z-index: 10;
+      }
+
+      .config-bar .input-group {
+        display: flex; align-items: center; gap: 6px; flex: 1;
+      }
+      .config-bar .input-group label {
+        font-size: 11px; font-weight: 600; color: var(--text-dim);
+        text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;
+      }
+      .config-bar .input-group input {
+        padding: 0 10px; height: 32px; width: 160px;
+        border: 1px solid rgba(184,134,11,0.25); border-radius: 5px;
+        font-size: 13px; outline: none; background: rgba(26,21,16,0.7); color: var(--text);
+        transition: border-color 0.2s;
+      }
+      .config-bar .input-group input::placeholder { color: rgba(168,152,120,0.35); }
+      .config-bar .input-group input:focus { border-color: var(--gold); }
+
+      button {
+        padding: 0 14px; border: none; border-radius: 5px;
+        font-weight: 600; font-size: 13px; cursor: pointer;
+        transition: all 0.15s; display: inline-flex;
+        align-items: center; justify-content: center;
+        height: 32px; white-space: nowrap; font-family: inherit;
+      }
+      button:active { transform: scale(0.97); }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), #8b6914);
+        color: #fff; box-shadow: 0 2px 8px rgba(184,134,11,0.2);
+      }
+      .btn-primary:hover { background: linear-gradient(135deg, var(--primary-hover), #7a5a10); }
+
+      .btn-danger { background: var(--danger); color: #fff; }
+      .btn-danger:hover { background: #a93226; }
+
+      .btn-ghost {
+        background: var(--primary-light); color: var(--gold);
+        border: 1px solid rgba(184,134,11,0.2);
+      }
+      .btn-ghost:hover { background: rgba(184,134,11,0.2); color: var(--gold-bright); }
+
+      .status-chip {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 12px; color: var(--text-dim);
+        padding: 0 10px; height: 32px; border-radius: 16px;
+        background: rgba(26,21,16,0.5); border: 1px solid rgba(184,134,11,0.1);
+        margin-left: auto;
+      }
+      .status-dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: #555; transition: background 0.3s, box-shadow 0.3s;
+      }
+      .status-dot.success { background: var(--success); box-shadow: 0 0 6px var(--success); }
+      .status-dot.error { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+      .status-dot.loading { background: #d4a017; animation: pulse 1.5s ease-in-out infinite; }
+      @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+      /* 数字人舞台 */
+      .sdk-area {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        padding: 16px;
+      }
+
+      #sdk {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        background-color: #0a0806;
+        border-radius: 10px;
+        box-shadow: 0 8px 32px -4px rgba(0,0,0,0.5);
+        position: relative;
+        overflow: hidden;
+      }
+
+      #sdk::before {
+        content: "文化遗产数字守护者";
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%,-50%);
+        color: rgba(184,134,11,0.15);
+        font-size: 18px; font-weight: 600;
+        letter-spacing: 8px;
+        z-index: 0; pointer-events: none;
+      }
+
+      /* skill 规范: widget_pic */
+      #bg-layer {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        object-fit: cover; z-index: 0;
+        display: none; opacity: 0.5;
+      }
+
+      /* 字幕 - 放在 sdk 外部下方，不被数字人遮挡 */
+      .subtitle-bar {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 700px;
+        padding: 10px 24px;
+        background: rgba(26,21,16,0.88);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(212,160,23,0.3);
+        border-radius: 8px;
+        color: var(--gold-bright);
+        font-size: 18px;
+        line-height: 1.6;
+        text-align: center;
+        z-index: 20;
+        display: none;
+        animation: subIn 0.3s ease;
+      }
+      @keyframes subIn {
+        from { opacity:0; transform: translateX(-50%) translateY(10px); }
+        to { opacity:1; transform: translateX(-50%) translateY(0); }
+      }
+
+      /* skill 规范: subtitle_on/off - 仍在 #sdk 内部供 SDK 回调，但视觉上隐藏 */
+      #custom-subtitle {
+        position: absolute; bottom: 0; left: 0;
+        width: 1px; height: 1px; overflow: hidden;
+        z-index: -1; opacity: 0;
+      }
+
+      /* === 右侧：信息面板 === */
+      .right-panel {
+        flex: 0 0 45%;
+        display: flex;
+        flex-direction: column;
+        background: var(--card);
+        border-left: 1px solid var(--card-border);
+        overflow: hidden;
+      }
+
+      .panel-top {
+        padding: 16px 20px 0;
+        flex-shrink: 0;
+      }
+
+      .panel-title {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 12px;
+      }
+      .panel-title h2 {
+        font-size: 20px; font-weight: 700;
+        color: var(--gold); letter-spacing: 3px;
+      }
+      .panel-title .line {
+        flex: 1; height: 1px;
+        background: linear-gradient(to right, rgba(184,134,11,0.3), transparent);
+      }
+
+      /* 模式 + 进度 */
+      .mode-row {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 12px;
+      }
+      .mode-tag {
+        padding: 3px 12px; border-radius: 14px;
+        font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+        transition: all 0.3s;
+      }
+      .mode-tag.idle { background: rgba(90,138,106,0.12); color: var(--jade); border: 1px solid rgba(90,138,106,0.2); }
+      .mode-tag.tour { background: rgba(212,160,23,0.15); color: var(--gold-bright); border: 1px solid rgba(212,160,23,0.3); animation: modePulse 2s ease-in-out infinite; }
+      .mode-tag.quiz { background: rgba(192,80,80,0.12); color: var(--cinnabar); border: 1px solid rgba(192,80,80,0.25); }
+      @keyframes modePulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+
+      .tour-progress { font-size: 13px; color: var(--text-dim); margin-left: auto; }
+
+      /* 分类标签 */
+      .cat-tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+      .cat-tab {
+        padding: 4px 14px; border-radius: 14px;
+        font-size: 13px; font-weight: 600;
+        cursor: pointer; transition: all 0.2s;
+        background: rgba(58,53,48,0.5); color: var(--text-dim);
+        border: 1px solid transparent;
+      }
+      .cat-tab:hover { color: var(--text); background: rgba(58,53,48,0.8); }
+      .cat-tab.active { background: var(--primary-light); color: var(--gold); border-color: rgba(184,134,11,0.3); }
+
+      /* 遗产选择器 */
+      .heritage-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px; margin-bottom: 12px;
+      }
+      .heritage-card {
+        padding: 10px 6px; border-radius: 8px;
+        text-align: center; cursor: pointer;
+        transition: all 0.2s;
+        background: rgba(58,53,48,0.3);
+        border: 1px solid rgba(184,134,11,0.08);
+      }
+      .heritage-card:hover { background: rgba(184,134,11,0.08); border-color: rgba(184,134,11,0.2); }
+      .heritage-card.active { background: rgba(184,134,11,0.12); border-color: var(--gold); box-shadow: 0 0 12px rgba(184,134,11,0.1); }
+      .heritage-card .hc-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+      .heritage-card .hc-tag { font-size: 11px; color: var(--text-dim); }
+
+      /* 详情区（可滚动） */
+      .detail-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 20px 16px;
+      }
+      .detail-scroll::-webkit-scrollbar { width: 4px; }
+      .detail-scroll::-webkit-scrollbar-track { background: transparent; }
+      .detail-scroll::-webkit-scrollbar-thumb { background: rgba(184,134,11,0.2); border-radius: 2px; }
+
+      .detail { display: none; animation: fadeIn 0.35s ease; }
+      .detail.visible { display: block; }
+      @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+      .detail-title {
+        font-size: 26px; font-weight: 700; color: var(--gold-bright);
+        margin-bottom: 6px;
+      }
+      .detail-era {
+        font-size: 14px; color: var(--jade);
+        padding: 3px 12px; border-radius: 12px;
+        background: rgba(90,138,106,0.12);
+        display: inline-block; margin-bottom: 10px;
+      }
+      .detail-desc {
+        font-size: 16px; color: var(--text-dim); line-height: 1.8;
+        margin-bottom: 18px;
+      }
+
+      .detail-section { margin-bottom: 16px; }
+      .detail-section h5 {
+        font-size: 14px; font-weight: 700;
+        color: var(--gold); text-transform: uppercase;
+        letter-spacing: 2px; margin-bottom: 8px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(184,134,11,0.15);
+      }
+      .detail-section p {
+        font-size: 16px; color: rgba(232,220,200,0.85); line-height: 1.9;
+      }
+      .detail-section ul { list-style: none; padding: 0; }
+      .detail-section li {
+        font-size: 16px; color: rgba(232,220,200,0.85); line-height: 1.9;
+        padding-left: 18px; position: relative;
+      }
+      .detail-section li::before {
+        content: ""; position: absolute; left: 0; top: 12px;
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--jade);
+      }
+
+      .placeholder {
+        text-align: center; padding: 40px 20px;
+        color: rgba(168,152,120,0.4); font-size: 16px;
+      }
+      .placeholder .icon { font-size: 36px; margin-bottom: 10px; display: block; }
+
+      /* 底部对话栏 */
+      .chat-bar {
+        padding: 12px 20px;
+        border-top: 1px solid var(--card-border);
+        flex-shrink: 0;
+        display: flex; gap: 8px;
+      }
+      .chat-bar input {
+        flex: 1; border: 1px solid rgba(184,134,11,0.2);
+        background: rgba(26,21,16,0.5);
+        padding: 0 16px; font-size: 15px; outline: none;
+        color: var(--text); height: 40px; border-radius: 20px;
+        font-family: inherit;
+        transition: border-color 0.2s;
+      }
+      .chat-bar input::placeholder { color: rgba(168,152,120,0.35); }
+      .chat-bar input:focus { border-color: var(--gold); }
+      .chat-bar button { border-radius: 20px; padding: 0 20px; height: 40px; }
+
+      /* --- 响应式 --- */
+      @media (max-width: 900px) {
+        .main-layout { flex-direction: column; }
+        .left-panel { flex: 0 0 45vh; }
+        .right-panel { flex: 1; border-left: none; border-top: 1px solid var(--card-border); }
+        .subtitle-bar { font-size: 15px; }
+      }
+    </style>
   </head>
   <body>
-    <p>正在跳转至 <a href="cultural-heritage-guardian.html">文化遗产数字守护者</a>...</p>
+    <div class="main-layout">
+      <!-- 左侧：数字人 -->
+      <div class="left-panel">
+        <div class="config-bar">
+          <div class="input-group">
+            <label>App ID</label>
+            <input type="text" id="inp-appid" placeholder="粘贴 App ID" />
+          </div>
+          <div class="input-group">
+            <label>Secret</label>
+            <input type="password" id="inp-secret" placeholder="粘贴 App Secret" />
+          </div>
+          <button class="btn-primary" onclick="doConnect()" id="btn-conn">连接</button>
+          <button class="btn-danger" onclick="doDisconnect()" style="display:none" id="btn-disconn">断开</button>
+          <button class="btn-ghost" onclick="toggleRatio()" id="btn-ratio">竖屏</button>
+          <div class="status-chip">
+            <div class="status-dot" id="status-light"></div>
+            <span id="status-text">未连接</span>
+          </div>
+        </div>
+
+        <div class="sdk-area">
+          <div id="sdk">
+            <img id="bg-layer" alt="background" />
+            <!-- skill 规范: subtitle_on/off 回调目标（视觉隐藏，内容同步到外部字幕） -->
+            <div id="custom-subtitle"></div>
+          </div>
+          <!-- 字幕放在 sdk 外部，不被数字人遮挡 -->
+          <div class="subtitle-bar" id="subtitle-display"></div>
+        </div>
+      </div>
+
+      <!-- 右侧：信息面板 -->
+      <div class="right-panel">
+        <div class="panel-top">
+          <div class="panel-title">
+            <h2>文化遗产</h2>
+            <div class="line"></div>
+          </div>
+          <div class="mode-row">
+            <div class="mode-tag idle" id="mode-indicator">待命</div>
+            <span class="tour-progress" id="tour-progress"></span>
+          </div>
+          <div class="cat-tabs" id="category-tabs">
+            <span class="cat-tab active" data-cat="all" onclick="filterCategory('all')">全部</span>
+            <span class="cat-tab" data-cat="建筑" onclick="filterCategory('建筑')">建筑</span>
+            <span class="cat-tab" data-cat="石窟" onclick="filterCategory('石窟')">石窟</span>
+            <span class="cat-tab" data-cat="陵墓" onclick="filterCategory('陵墓')">陵墓</span>
+            <span class="cat-tab" data-cat="自然" onclick="filterCategory('自然')">自然</span>
+            <span class="cat-tab" data-cat="非遗" onclick="filterCategory('非遗')">非遗</span>
+          </div>
+          <div class="heritage-grid" id="heritage-grid"></div>
+        </div>
+
+        <div class="detail-scroll">
+          <div class="detail" id="detail">
+            <div class="detail-title" id="d-name"></div>
+            <div class="detail-era" id="d-era"></div>
+            <div class="detail-desc" id="d-desc"></div>
+            <div class="detail-section">
+              <h5>历史沿革</h5>
+              <p id="d-history"></p>
+            </div>
+            <div class="detail-section">
+              <h5>核心知识</h5>
+              <ul id="d-facts"></ul>
+            </div>
+            <div class="detail-section">
+              <h5>文化故事</h5>
+              <p id="d-stories"></p>
+            </div>
+          </div>
+          <div class="placeholder" id="placeholder">
+            <span class="icon">&#127963;</span>
+            选择文化遗产，数字人将为您讲解
+          </div>
+        </div>
+
+        <div class="chat-bar">
+          <input type="text" id="tts-input" placeholder="输入问题，如：长城有多长？" />
+          <button class="btn-primary" onclick="askQuestion()">提问</button>
+          <button class="btn-ghost" onclick="startTour()" id="btn-tour">导览</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://media.xingyun3d.com/xingyun3d/general/litesdk/xmovAvatar@latest.js"></script>
+
+    <script>
+      let sdk = null;
+      let isPortrait = false;
+      let pendingSpeak = null;
+      let currentMode = "idle";
+      let tourTimers = [];
+      let tourIndex = 0;
+      let currentCategory = "all";
+
+      // 🔥 文化遗产数据
+      const heritages = [
+        {
+          id: "great-wall", name: "长城", category: "建筑",
+          era: "春秋战国至今",
+          desc: "中国古代伟大的防御工程，横亘于崇山峻岭之间，是人类建筑史上的奇迹，1987年列入世界文化遗产。",
+          history: "始建于春秋战国时期，秦统一六国后连接修缮，汉明两代大规模修建。现存长城主要为明代修筑，西起嘉峪关，东至山海关，横跨15个省份。",
+          facts: ["全长超过21196公里，是世界上最长的防御工程","城墙平均高6-7米，宽4-5米，可供五马并骑","由城墙、敌楼、关城、烽火台构成完整防御体系","1987年成为中国首批世界文化遗产"],
+          stories: "孟姜女哭长城的故事流传千年。传说孟姜女的丈夫被征修长城而死，她千里寻夫哭倒长城，折射出长城修筑背后的沉重代价。"
+        },
+        {
+          id: "forbidden-city", name: "故宫", category: "建筑",
+          era: "明永乐四年（1406）",
+          desc: "中国明清两代皇家宫殿，旧称紫禁城，是世界上现存规模最大、保存最完整的木质结构古建筑群，1987年列入世界文化遗产。",
+          history: "建于明朝永乐四年，历时14年建成，是明清两代24位皇帝的居所和施政中心。1912年清帝退位后对外开放，1925年成立故宫博物院。",
+          facts: ["占地约72万平方米，建筑面积约15万平方米","有宫殿七十多座，房屋九千余间","收藏文物超过186万件，是中国最大的古代文化艺术博物馆","建筑严格遵循中轴对称，体现皇权至上理念"],
+          stories: "传说故宫有9999间半房间，因天帝天宫有10000间，人间皇宫不能超过天宫，故少半间。实际经测量有8700余间。"
+        },
+        {
+          id: "terracotta", name: "兵马俑", category: "陵墓",
+          era: "秦（前246-前208）",
+          desc: "秦始皇陵的陪葬坑，被誉为\"世界第八大奇迹\"，1987年列入世界文化遗产，是研究秦代历史最重要的实物资料。",
+          history: "建于公元前246年至前208年，是秦始皇为自己修建的地下军队。1974年被临潼西杨村农民打井时偶然发现，震惊世界。",
+          facts: ["已发现兵马俑超过8000个，分步兵、骑兵、车兵等兵种","每个兵马俑面容不同，千人千面","原本通体彩绘，出土后数分钟内颜色即褪尽","三个坑总面积超过20000平方米"],
+          stories: "1974年，农民杨志发打井时挖出陶俑碎片，揭开了沉睡两千多年的地下军阵。这一偶然发现改变了世界对中国古代雕塑艺术的认知。"
+        },
+        {
+          id: "potala", name: "布达拉宫", category: "建筑",
+          era: "7世纪始建",
+          desc: "世界上海拔最高的宫殿，藏传佛教圣地，1994年列入世界文化遗产，是西藏最宏伟的标志性建筑。",
+          history: "始建于7世纪吐蕃赞普松赞干布时期，为迎娶文成公主而建。17世纪由五世达赖喇嘛重建，成为历代达赖喇嘛的冬宫居所。",
+          facts: ["位于拉萨红山之巅，海拔3700米","主楼13层，高117米，建筑面积约13万平方米","融合藏、汉、尼泊尔等多种建筑风格","宫内保存大量珍贵壁画、唐卡和佛像"],
+          stories: "相传松赞干布为迎娶大唐文成公主而修建此宫，这段汉藏联姻的佳话成为民族团结的象征，至今仍被传颂。"
+        },
+        {
+          id: "mogao", name: "莫高窟", category: "石窟",
+          era: "前秦建元二年（366）",
+          desc: "中国四大石窟之一，世界上现存规模最大、内容最丰富的佛教艺术圣地，1987年列入世界文化遗产，被誉为\"墙壁上的博物馆\"。",
+          history: "始建于前秦建元二年，历经十六国、北朝、隋、唐、五代、西夏、元等千余年持续营建，形成规模宏大的石窟群。",
+          facts: ["位于敦煌鸣沙山东麓，现存有壁画塑像的洞窟735个","保存壁画4.5万平方米，彩塑2415尊","藏经洞出土文献5万余件，涵盖4-11世纪珍贵史料","飞天形象是莫高窟最著名的艺术符号"],
+          stories: "1900年，道士王圆箓偶然发现藏经洞，近千年经卷文书重见天日。然而大量珍贵文物被外国探险家掠走，成为中国文化遗产保护史上最痛心的一页。"
+        },
+        {
+          id: "suzhou-gardens", name: "苏州园林", category: "建筑",
+          era: "春秋至今",
+          desc: "中国古典园林的代表，以\"咫尺之内再造乾坤\"著称，1997年列入世界文化遗产，体现了中国古代文人山水审美理想。",
+          history: "苏州园林起源于春秋吴国，鼎盛于明清。现存完整园林60余处，其中拙政园、留园、网师园、环秀山庄最具代表性。",
+          facts: ["拙政园是苏州最大的古典园林，占地约5.2公顷","留园与颐和园、避暑山庄、拙政园并称中国四大名园","园林设计讲究借景、对景、框景等造景手法","被联合国教科文组织誉为\"东方文明的艺术典范\""],
+          stories: "拙政园名取自晋代潘岳《闲居赋》\"筑室种树，逍遥自得……此亦拙者之为政也\"，表达了文人归隐田园、寄情山水的心志。"
+        },
+        {
+          id: "longmen", name: "龙门石窟", category: "石窟",
+          era: "北魏至宋代",
+          desc: "中国四大石窟之一，2000年列入世界文化遗产，是北魏至唐代皇家造像艺术的巅峰。",
+          history: "开凿于北魏孝文帝迁都洛阳前后（493年），历经东魏、西魏、北齐、隋、唐等朝代连续营造达400余年。",
+          facts: ["现存窟龛2345个，造像10万余尊","碑刻题记2860多品，是中国石窟中题记最多的一处","卢舍那大佛高17.14米，是龙门石窟最大的佛像","奉先寺由武则天赞助修造，据传以武则天容貌为蓝本"],
+          stories: "传说卢舍那大佛以武则天容貌为蓝本雕刻。武则天曾以两万贯脂粉钱赞助奉先寺修造，这尊大佛成为大唐盛世与女性力量的永恒象征。"
+        },
+        {
+          id: "ming-tombs", name: "明孝陵", category: "陵墓",
+          era: "明洪武十四年（1381）",
+          desc: "明太祖朱元璋与马皇后合葬陵寝，2003年列入世界文化遗产，开创了明清帝陵的一代规制。",
+          history: "始建于洪武十四年，永乐三年建成，历时25年。是中国规模最大的帝王陵寝之一，也是南京地区唯一的世界文化遗产。",
+          facts: ["占地约170万平方米，是中国规模最大的帝王陵寝之一","神道石刻共12对石兽、2对石人，造型生动","首创方城明楼制度，影响明清两代帝陵规制","2003年与明十三陵等合并列入世遗"],
+          stories: "明孝陵的神道不走直线而是弯曲绕行，据说是为了避开孙权墓。朱元璋曾说\"孙权也是条好汉，留他守门\"，故神道绕孙权墓而过。"
+        },
+        {
+          id: "huangshan", name: "黄山", category: "自然",
+          era: "形成于1亿年前",
+          desc: "中国最著名的山岳风景区之一，1990年列入世界文化与自然双重遗产，以奇松、怪石、云海、温泉\"四绝\"闻名天下。",
+          history: "黄山古称黟山，因传说轩辕黄帝曾在此炼丹而改名。唐天宝六年由唐玄宗下令改名黄山，此后成为文人墨客的朝圣之地。",
+          facts: ["最高峰莲花峰海拔1864.8米","以奇松、怪石、云海、温泉、冬雪\"五绝\"著称","徐霞客赞\"五岳归来不看山，黄山归来不看岳\"","是中国仅有的四处世界双重遗产之一"],
+          stories: "徐霞客一生两度登临黄山，发出\"薄海内外之名山，无如徽之黄山\"的绝赞。\"黄山归来不看岳\"成为千古名句，奠定了黄山在中国名山中的至高地位。"
+        },
+        {
+          id: "kunqu", name: "昆曲", category: "非遗",
+          era: "元末明初",
+          desc: "中国最古老的戏曲剧种之一，被誉为\"百戏之祖\"，2001年入选联合国教科文组织首批\"人类口头和非物质遗产代表作\"。",
+          history: "起源于元末明初昆山一带，经魏良辅等人改革后形成\"水磨调\"，明万历年间风靡全国。清中叶后渐衰，1956年《十五贯》演出后复兴。",
+          facts: ["有600余年历史，是中国最古老的戏曲剧种之一","唱腔细腻婉转，称\"水磨调\"，一唱三叹","代表剧目有《牡丹亭》《长生殿》《桃花扇》等","2001年成为中国首个入选世界非遗的项目"],
+          stories: "汤显祖的《牡丹亭》是昆曲最经典的作品。杜丽娘\"游园惊梦\"，梦中与柳梦梅相遇，醒后相思而死，又因情复生——\"情不知所起，一往而深\"，成为中国文学最动人的爱情宣言。"
+        }
+      ];
+
+      const qaDB = [
+        { kw: ["长城","多长","长度"], a: "长城全长超过21196公里，横跨中国15个省份，是世界上最长的防御工程。" },
+        { kw: ["长城","作用","为什么","防御"], a: "长城的主要作用是防御北方游牧民族入侵，同时兼具边疆治理、商贸管控和通讯传递功能，更是中华文明的精神象征。" },
+        { kw: ["长城","朝代","谁修"], a: "长城始建于春秋战国，秦统一后连接修缮，汉明两代大规模修建。现存长城主要为明代修筑。" },
+        { kw: ["故宫","建于","什么时候","年代"], a: "故宫建于明朝永乐四年，即公元1406年，历时14年建成，是明清两代24位皇帝的居所。" },
+        { kw: ["故宫","房间","多少","间"], a: "传说故宫有9999间半房间，实际经测量有8700余间，是世界上规模最大的宫殿建筑群。" },
+        { kw: ["故宫","文物","收藏"], a: "故宫收藏文物超过186万件，是中国最大的古代文化艺术博物馆，其中一级文物超过8000件。" },
+        { kw: ["兵马俑","发现","哪里"], a: "兵马俑于1974年在陕西西安临潼区被农民打井时偶然发现，被誉为世界第八大奇迹。" },
+        { kw: ["兵马俑","数量","多少"], a: "已发现兵马俑超过8000个，分为步兵、骑兵、车兵等兵种，每个面容都不相同。" },
+        { kw: ["布达拉宫","海拔","多高"], a: "布达拉宫位于拉萨红山之巅，海拔3700米，是世界上海拔最高的宫殿。" },
+        { kw: ["布达拉宫","谁建","历史"], a: "布达拉宫始建于7世纪，由吐蕃赞普松赞干布为迎娶文成公主而建，17世纪由五世达赖喇嘛重建。" },
+        { kw: ["莫高窟","洞窟","多少"], a: "莫高窟现存有壁画和塑像的洞窟735个，保存壁画4.5万平方米，彩塑2415尊。" },
+        { kw: ["莫高窟","飞天"], a: "飞天是莫高窟最著名的艺术符号，从北凉到元代都有飞天形象，总计约4500余身，是中国艺术的瑰宝。" },
+        { kw: ["苏州园林","拙政园"], a: "拙政园是苏州最大的古典园林，占地约5.2公顷，与留园、网师园、环秀山庄同为世界文化遗产。" },
+        { kw: ["龙门石窟","卢舍那","大佛"], a: "卢舍那大佛高17.14米，是龙门石窟最大的佛像，位于奉先寺，据传以武则天容貌为蓝本雕刻。" },
+        { kw: ["黄山","四绝","五绝"], a: "黄山以奇松、怪石、云海、温泉、冬雪\"五绝\"著称，徐霞客赞\"黄山归来不看岳\"。" },
+        { kw: ["昆曲","百戏","之祖"], a: "昆曲有600余年历史，被誉为\"百戏之祖\"，2001年成为中国首个入选世界非遗的项目。" },
+        { kw: ["昆曲","牡丹亭"], a: "《牡丹亭》是汤显祖的昆曲经典，杜丽娘\"情不知所起，一往而深\"是中国文学最动人的爱情宣言。" },
+        { kw: ["保护","文化遗产","如何"], a: "保护文化遗产需要完善法律法规、科学修复技术、公众教育宣传，以及利用数字技术进行永久保存。" },
+        { kw: ["世界遗产","中国","多少"], a: "中国拥有世界遗产57项，位居世界第二，其中文化遗产39项，自然遗产14项，双重遗产4项。" },
+        { kw: ["明孝陵","朱元璋"], a: "明孝陵是明太祖朱元璋与马皇后的合葬陵寝，占地约170万平方米，开创了明清帝陵的一代规制。" }
+      ];
+
+      // --- 渲染遗产网格 ---
+      function renderGrid(cat) {
+        const grid = document.getElementById("heritage-grid");
+        const filtered = cat === "all" ? heritages : heritages.filter(h => h.category === cat);
+        grid.innerHTML = filtered.map(h =>
+          `<div class="heritage-card" data-id="${h.id}" onclick="selectHeritage('${h.id}')">
+            <div class="hc-name">${h.name}</div>
+            <div class="hc-tag">${h.category}</div>
+          </div>`
+        ).join("");
+      }
+
+      function filterCategory(cat) {
+        currentCategory = cat;
+        document.querySelectorAll(".cat-tab").forEach(t => t.classList.toggle("active", t.dataset.cat === cat));
+        renderGrid(cat);
+      }
+
+      // --- 模式管理 ---
+      function setMode(mode) {
+        currentMode = mode;
+        const el = document.getElementById("mode-indicator");
+        el.className = "mode-tag " + mode;
+        el.textContent = { idle: "待命", tour: "导览中", quiz: "问答" }[mode] || "待命";
+        const btn = document.getElementById("btn-tour");
+        if (mode === "tour") { btn.textContent = "停止"; btn.onclick = stopTour; }
+        else { btn.textContent = "导览"; btn.onclick = startTour; }
+      }
+
+      function stopTour() {
+        tourTimers.forEach(t => clearTimeout(t));
+        tourTimers = []; tourIndex = 0;
+        setMode("idle");
+        document.getElementById("tour-progress").textContent = "";
+        if (sdk) speakWithInterrupt("导览已停止，您可以随时提问或重新开始导览。");
+      }
+
+      // --- SDK 连接 ---
+      async function doConnect() {
+        if (sdk) return;
+        const appId = document.getElementById("inp-appid").value.trim();
+        const appSecret = document.getElementById("inp-secret").value.trim();
+        if (!appId || !appSecret) { alert("请先填写 AppID 和 AppSecret"); return; }
+
+        updateStatus("loading", "连接中...");
+
+        sdk = new XmovAvatar({
+          containerId: "#sdk",
+          appId, appSecret,
+          gatewayServer: "https://nebula-agent.xingyun3d.com/user/v1/ttsa/session",
+          onMessage: (msg) => console.log("SDK Event:", msg),
+          proxyWidget: {
+            "widget_pic": (data) => {
+              const bg = document.getElementById("bg-layer");
+              if (data.image) { bg.src = data.image; bg.style.display = "block"; }
+            },
+            // skill 规范: subtitle_on 拦截，内容同步到外部字幕显示
+            "subtitle_on": (data) => {
+              // 同步到 #custom-subtitle（供 SDK 内部逻辑）
+              const sub = document.getElementById("custom-subtitle");
+              if (data.text) sub.textContent = data.text;
+              // 同步到外部可见字幕
+              const display = document.getElementById("subtitle-display");
+              if (data.text) { display.textContent = data.text; display.style.display = "block"; }
+              return false;
+            },
+            "subtitle_off": () => {
+              document.getElementById("custom-subtitle").textContent = "";
+              document.getElementById("subtitle-display").style.display = "none";
+              return false;
+            }
+          },
+          onVoiceStateChange: (res) => {
+            const state = res.state || res;
+            if (state === "idle" || state === "end") {
+              if (pendingSpeak) {
+                const text = pendingSpeak;
+                pendingSpeak = null;
+                sdk.speak(text, true, true);
+              }
+            }
+          }
+        });
+
+        try {
+          await sdk.init({ onDownloadProgress: (p) => { if (p < 100) updateStatus("loading", `${p}%`); } });
+          updateStatus("success", "已连接");
+          toggleButtons(true);
+        } catch (err) {
+          console.error(err);
+          updateStatus("error", "连接失败");
+          alert("连接失败，请检查凭证 (F12看详情)");
+          sdk = null;
+        }
+      }
+
+      function doDisconnect() {
+        stopTour();
+        if (sdk) { sdk.destroy(); sdk = null; pendingSpeak = null; }
+        updateStatus("error", "已断开");
+        toggleButtons(false);
+        setMode("idle");
+      }
+
+      function toggleRatio() {
+        const c = document.getElementById("sdk"), b = document.getElementById("btn-ratio");
+        if (isPortrait) { c.style.aspectRatio = "16/9"; isPortrait = false; b.textContent = "竖屏"; }
+        else { c.style.aspectRatio = "9/16"; isPortrait = true; b.textContent = "横屏"; }
+      }
+
+      // --- 选择遗产 ---
+      function selectHeritage(id) {
+        const h = heritages.find(x => x.id === id);
+        if (!h) return;
+        updateDetail(h);
+        if (sdk && currentMode !== "tour") {
+          setMode("quiz");
+          speakWithInterrupt(`${h.name}。${h.desc}`);
+        }
+      }
+
+      function updateDetail(h) {
+        document.querySelectorAll(".heritage-card").forEach(c => c.classList.toggle("active", c.dataset.id === h.id));
+        document.getElementById("d-name").textContent = h.name;
+        document.getElementById("d-era").textContent = h.era;
+        document.getElementById("d-desc").textContent = h.desc;
+        document.getElementById("d-history").textContent = h.history;
+        document.getElementById("d-stories").textContent = h.stories;
+        document.getElementById("d-facts").innerHTML = h.facts.map(f => `<li>${f}</li>`).join("");
+        document.getElementById("detail").classList.add("visible");
+        document.getElementById("placeholder").style.display = "none";
+        // 滚动到顶部
+        document.querySelector(".detail-scroll").scrollTop = 0;
+      }
+
+      // --- 导览 ---
+      function startTour() {
+        if (!sdk) { alert("请先连接"); return; }
+        tourTimers.forEach(t => clearTimeout(t));
+        tourTimers = []; tourIndex = 0;
+        setMode("tour");
+
+        const list = currentCategory === "all" ? heritages : heritages.filter(h => h.category === currentCategory);
+
+        function tourNext() {
+          if (tourIndex >= list.length) {
+            setMode("idle");
+            document.getElementById("tour-progress").textContent = "";
+            speakWithInterrupt("导览结束！希望您对中国的文化遗产有了更深入的了解。您可以随时提问。");
+            return;
+          }
+          const h = list[tourIndex];
+          document.getElementById("tour-progress").textContent = `${tourIndex + 1} / ${list.length}`;
+          updateDetail(h);
+
+          sdk.speak(`第${tourIndex+1}站，${h.name}。${h.desc}`, true, false);
+          tourTimers.push(setTimeout(() => sdk.speak(`历史沿革：${h.history}`, false, false), 5000));
+          tourTimers.push(setTimeout(() => {
+            sdk.speak(`核心知识：${h.facts.slice(0,2).join("；")}`, false, false);
+          }, 10000));
+          tourTimers.push(setTimeout(() => sdk.speak(`文化故事：${h.stories}`, false, true), 15000));
+
+          tourIndex++;
+          tourTimers.push(setTimeout(tourNext, 22000));
+        }
+
+        speakWithInterrupt(`欢迎来到文化遗产数字守护者！我将带您领略${list.length}处中国文化遗产的魅力。`);
+        tourTimers.push(setTimeout(tourNext, 4000));
+      }
+
+      // --- 提问 ---
+      function askQuestion() {
+        if (!sdk) { alert("请先连接"); return; }
+        const text = document.getElementById("tts-input").value.trim();
+        if (!text) return;
+        if (currentMode === "tour") {
+          tourTimers.forEach(t => clearTimeout(t));
+          tourTimers = [];
+          document.getElementById("tour-progress").textContent = "";
+        }
+        setMode("quiz");
+        speakWithInterrupt(findAnswer(text));
+      }
+
+      function speakWithInterrupt(text) {
+        if (!sdk) return;
+        sdk.interactiveidle();
+        pendingSpeak = text;
+      }
+
+      function findAnswer(q) {
+        const lq = q.toLowerCase();
+        for (const qa of qaDB) { if (qa.kw.every(k => lq.includes(k))) return qa.a; }
+        for (const qa of qaDB) { if (qa.kw.some(k => lq.includes(k))) return qa.a; }
+        for (const h of heritages) { if (lq.includes(h.name)) return `${h.name}：${h.desc}`; }
+        return "关于这个问题，我还需要进一步学习。您可以尝试询问长城、故宫、兵马俑等文化遗产的相关知识。";
+      }
+
+      // --- UI ---
+      function updateStatus(state, text) {
+        const l = document.getElementById("status-light"), t = document.getElementById("status-text");
+        l.className = "status-dot";
+        if (state === "success") l.classList.add("success");
+        else if (state === "error") l.classList.add("error");
+        else if (state === "loading") l.classList.add("loading");
+        t.innerText = text;
+      }
+
+      function toggleButtons(on) {
+        document.getElementById("btn-conn").style.display = on ? "none" : "inline-flex";
+        document.getElementById("btn-disconn").style.display = on ? "inline-flex" : "none";
+      }
+
+      // skill 规范: 生命周期红线
+      window.addEventListener("beforeunload", () => { if (sdk) sdk.destroy(); });
+
+      renderGrid("all");
+    </script>
   </body>
 </html>

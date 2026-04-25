@@ -6,7 +6,7 @@
 
 ```
 xmov/
-├── cultural-heritage-guardian.html   # 主 Demo（单文件，浏览器直接打开）
+├── index.html                        # 主 Demo（单文件，浏览器直接打开）
 ├── README.md
 └── .codeartsdoer/                    # CodeArts 智能体配置
     └── skills/xmov/SKILL.md          # SDK 集成专家 Skill 定义
@@ -25,7 +25,7 @@ xmov/
 
 ## 快速开始
 
-1. 在浏览器中打开 `cultural-heritage-guardian.html`
+1. 在浏览器中打开 `index.html`
 2. 在顶部输入框填入魔珐星云平台的 **App ID** 和 **App Secret**
 3. 点击 **连接** 按钮，等待数字人加载完成
 4. 选择文化遗产或点击 **导览** 开始自动讲解
@@ -132,4 +132,4 @@ idle (待命) ──点击导览──→ tour (导览中) ──点击提问─
 5. 点击 **Save**，等待部署完成
 6. 访问地址：`https://yeatsliao.github.io/xmov/`
 
-> `index.html` 会自动重定向到 `cultural-heritage-guardian.html`，根路径即可访问。
+> 主文件已命名为 `index.html`，GitHub Pages 根路径即可直接访问。
